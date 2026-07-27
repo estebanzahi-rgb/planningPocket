@@ -4,7 +4,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import pkg from './package.json' assert { type: 'json' };
+import { readFileSync } from 'fs';
 
 const app = express();
 const httpServer = createServer(app);
@@ -17,6 +17,7 @@ const io = new Server(httpServer, {
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const pkg = JSON.parse(readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
 const APP_VERSION = process.env.APP_VERSION || pkg.version || '1.0.0';
 
 app.use(cors());

@@ -133,12 +133,23 @@ io.on('connection', (socket) => {
       return;
     }
 
-    if (isOwner) {
+    const remaining = session.participants.filter((p) => p.id !== socket.id && p.name !== participantName);
+    const ownerLeft = isOwner || session.ownerName === participantName;
+
+    if (ownerLeft && remaining.length > 0) {
+      const newOwner = remaining[0];
+      newOwner.isOwner = true;
+      session.ownerName = newOwner.name;
+      session.participants = remaining;
+      emitSessionState(socket, sessionCode);
+      return;
+    }
+
+    if (ownerLeft && remaining.length === 0) {
       expireSession(sessionCode);
       return;
     }
 
-    const remaining = session.participants.filter((p) => p.id !== socket.id && p.name !== participantName);
     if (remaining.length !== session.participants.length) {
       session.participants = remaining;
       emitSessionState(socket, sessionCode);

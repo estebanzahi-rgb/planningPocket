@@ -54,6 +54,18 @@ function App() {
     }
   }, [sessionState?.title]);
 
+  const joinSocketSession = ({ sessionCode, participantName, isOwner }) => {
+    const doJoin = () => {
+      socket.emit('join-session', { sessionCode, participantName, isOwner });
+    };
+
+    if (socket.connected) {
+      doJoin();
+    } else {
+      socket.once('connect', doJoin);
+    }
+  };
+
   const createSession = () => {
     setErrorMessage('');
 
@@ -67,12 +79,18 @@ function App() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ownerName, title })
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('No se pudo crear la sesión');
+        }
+        return res.json();
+      })
       .then((data) => {
         setSessionCode(data.sessionCode);
+        setParticipantName(ownerName);
         setJoined(true);
         setIsOwner(true);
-        socket.emit('join-session', { sessionCode: data.sessionCode, participantName: ownerName, isOwner: true });
+        joinSocketSession({ sessionCode: data.sessionCode, participantName: ownerName, isOwner: true });
       })
       .catch(() => {
         setErrorMessage('No se pudo crear la sesión. Intenta de nuevo.');

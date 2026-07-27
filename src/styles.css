@@ -159,74 +159,119 @@ button:disabled {
 
 .vote-status-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 12px;
 }
 
-.vote-status-bubble {
+.vote-status-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px;
+  gap: 12px;
+  padding: 10px 12px;
   border-radius: 16px;
   background: #f8fafc;
   border: 1px solid #cbd5e1;
 }
 
-.vote-status-icon {
-  width: 34px;
-  height: 34px;
+.vote-avatar {
+  width: 40px;
+  height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
   font-weight: bold;
-}
-
-.vote-status-icon.voted {
-  background: #34d399;
   color: white;
 }
 
-.vote-status-icon.pending {
-  background: #f8fafc;
-  color: #64748b;
-  border: 1px solid #cbd5e1;
+.vote-avatar.voted {
+  background: #34d399;
+}
+
+.vote-avatar.pending {
+  background: #cbd5e1;
+  color: #475569;
+}
+
+.vote-status-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vote-status-name {
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 
 .vote-status-label {
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 600;
 }
 
-.vote-result-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+.vote-status-label.voted {
+  color: #16a34a;
+}
+
+.vote-status-label.pending {
+  color: #64748b;
+}
+
+.vote-result-groups {
+  display: grid;
+  gap: 16px;
   margin-top: 16px;
 }
 
+.vote-result-group {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 12px;
+  border-radius: 16px;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+}
+
+.vote-result-label {
+  min-width: 44px;
+  font-weight: 700;
+}
+
+.vote-result-bubbles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .vote-result-bubble {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  border: 2px solid #cbd5e1;
-  font-size: 1.1rem;
-  font-weight: bold;
-}
-
-.vote-result-bubble.voted {
   background: #34d399;
   color: white;
-  border-color: #10b981;
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 
-.vote-result-bubble.pending {
-  background: #f8fafc;
-  color: #64748b;
+.vote-result-count {
+  min-width: 32px;
+  text-align: right;
+  color: #475569;
+  font-weight: 700;
+}
+
+.top-vote-values {
+  margin-top: 16px;
+  font-size: 0.95rem;
+}
+
+.top-vote-value {
+  display: inline-flex;
+  margin-left: 8px;
 }
 
 .top-vote-values {

@@ -360,13 +360,16 @@ function App() {
               <h3>Estado de votación</h3>
               <div className="vote-status-grid">
                 {voterStatus.map((participant) => (
-                  <div key={participant.id} className="vote-status-bubble">
-                    <span className={`vote-status-icon ${participant.voted ? 'voted' : 'pending'}`}>
-                      {participant.voted ? '✓' : ''}
+                  <div key={participant.id} className="vote-status-row">
+                    <span className={`vote-avatar ${participant.voted ? 'voted' : 'pending'}`}>
+                      {getInitials(participant.name)}
                     </span>
-                    <span className="vote-status-label">
-                      {participant.voted ? (sessionState?.revealed ? participant.voteValue : 'Votó') : 'Pendiente'}
-                    </span>
+                    <div className="vote-status-meta">
+                      <span className="vote-status-name">{participant.name}</span>
+                      <span className={`vote-status-label ${participant.voted ? 'voted' : 'pending'}`}>
+                        {participant.voted ? 'Votó' : 'Pendiente'}
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -376,13 +379,23 @@ function App() {
           <div className="results">
             <h3>Resultados</h3>
             {sessionState?.revealed ? (
-              <div className="vote-result-grid">
-                {voterStatus.map((participant) => (
-                  <div
-                    key={participant.id}
-                    className={`vote-result-bubble ${participant.voted ? 'voted' : 'pending'}`}
-                  >
-                    {participant.voted ? getInitials(participant.name) : ''}
+              <div className="vote-result-groups">
+                {voteSummary.filter((group) => group.count > 0).map((group) => (
+                  <div key={group.value} className="vote-result-group">
+                    <div className="vote-result-label">{group.value}</div>
+                    <div className="vote-result-bubbles">
+                      {voterStatus
+                        .filter((participant) => participant.voteValue === group.value)
+                        .map((participant) => (
+                          <span
+                            key={participant.id}
+                            className="vote-result-bubble voted"
+                          >
+                            {getInitials(participant.name)}
+                          </span>
+                        ))}
+                    </div>
+                    <div className="vote-result-count">{group.count}</div>
                   </div>
                 ))}
               </div>

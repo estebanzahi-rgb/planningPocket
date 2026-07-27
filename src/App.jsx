@@ -39,6 +39,12 @@ function App() {
     };
   }, [participantName]);
 
+  useEffect(() => {
+    if (sessionState?.title && sessionState.title !== title) {
+      setTitle(sessionState.title);
+    }
+  }, [sessionState?.title]);
+
   const createSession = () => {
     setErrorMessage('');
 
@@ -107,12 +113,32 @@ function App() {
     socket.emit('update-title', { sessionCode, title });
   };
 
+  const leaveSession = () => {
+    setJoined(false);
+    setSessionState(null);
+    setCurrentVote(null);
+    setIsOwner(false);
+    setErrorMessage('');
+  };
+
   const voteSummary = useMemo(() => {
     if (!sessionState?.votes?.length) return [];
     return VOTE_OPTIONS.map((value) => ({
       value,
       count: sessionState.votes.filter((vote) => vote.value === value).length
     }));
+  }, [sessionState]);
+
+  const voteStatusByParticipant = useMemo(() => {
+    if (!sessionState?.participants?.length) return [];
+    return sessionState.participants.map((participant) => {
+      const vote = sessionState.votes.find((item) => item.participantName === participant.name);
+      return {
+        ...participant,
+        voted: Boolean(vote),
+        voteValue: vote?.value ?? null
+      };
+    });
   }, [sessionState]);
 
   return (
@@ -171,6 +197,7 @@ function App() {
                 <button onClick={resetVotes}>Resetear</button>
               </>
             )}
+            <button className="secondary" onClick={leaveSession}>Salir</button>
           </div>
 
           <div className="vote-grid">
@@ -194,6 +221,20 @@ function App() {
               </div>
             ))}
           </div>
+
+          {isOwner && (
+            <div className="vote-status">
+              <h3>Estado de votación</h3>
+              {voteStatusByParticipant.map((participant) => (
+                <div key={participant.id} className="participant-item">
+                  <span>{participant.name}</span>
+                  <span className={participant.voted ? 'voted' : 'pending'}>
+                    {participant.voted ? `Votó${participant.voteValue !== null ? ` (${participant.voteValue})` : ''}` : 'Falta votar'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="results">
             <h3>Resultados</h3>

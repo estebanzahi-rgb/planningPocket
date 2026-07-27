@@ -61,15 +61,44 @@ button:hover {
   color: #0f172a;
 }
 
-.vote-card.selected {
+vote-card.selected {
   background: #22c55e;
   color: white;
+}
+
+.vote-status {
+  margin-bottom: 16px;
+}
+
+.vote-status h3 {
+  margin-bottom: 12px;
+}
+
+.participant-item span.voted {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.participant-item span.pending {
+  color: #b91c1c;
+  font-weight: 600;
 }
 
 .actions {
   display: flex;
   gap: 10px;
   margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+button.secondary {
+  background: #e5e7eb;
+  color: #111827;
+  border: 1px solid #d1d5db;
+}
+
+button.secondary:hover {
+  background: #d1d5db;
 }
 
 .participant-item, .vote-item {

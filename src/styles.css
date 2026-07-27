@@ -47,6 +47,87 @@ button:hover {
   background: #1d4ed8;
 }
 
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.participant-summary {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.summary-pill {
+  background: #f1f5f9;
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: #334155;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #cbd5e1;
+}
+
+.participant-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.participant-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 999px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #0f172a;
+  min-width: 120px;
+}
+
+.participant-chip.admin {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.participant-chip.voted {
+  border-color: #34d399;
+}
+
+.participant-avatar {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #2563eb;
+  color: white;
+  font-weight: bold;
+}
+
+.participant-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.participant-badge {
+  background: #2563eb;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+}
+
+.participant-check {
+  color: #16a34a;
+  font-weight: bold;
+}
+
 .vote-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -59,11 +140,13 @@ button:hover {
   font-size: 20px;
   background: #f1f5f9;
   color: #0f172a;
+  border: 1px solid #cbd5e1;
 }
 
-vote-card.selected {
+.vote-card.selected {
   background: #22c55e;
   color: white;
+  border-color: #16a34a;
 }
 
 .vote-status {
@@ -110,6 +193,13 @@ button.secondary:hover {
 
 .session-header {
   margin-bottom: 16px;
+}
+
+.story-title {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #f1f5f9;
+  border-radius: 10px;
 }
 
 .error-message {

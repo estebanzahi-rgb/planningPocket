@@ -106,7 +106,15 @@ function App() {
 
   const handleVote = (value) => {
     setCurrentVote(value);
-    socket.emit('cast-vote', { sessionCode, participantName, value });
+  };
+
+  const submitVote = () => {
+    setErrorMessage('');
+    if (!currentVote) {
+      setErrorMessage('Selecciona una opción antes de enviar.');
+      return;
+    }
+    socket.emit('cast-vote', { sessionCode, participantName, value: currentVote });
   };
 
   const revealVotes = () => {
@@ -133,6 +141,11 @@ function App() {
     setErrorMessage('');
   };
 
+  const hasVoted = useMemo(() => {
+    if (!participantName || !sessionState?.votes?.length) return false;
+    return sessionState.votes.some((vote) => vote.participantName === participantName);
+  }, [participantName, sessionState]);
+
   const voteSummary = useMemo(() => {
     if (!sessionState?.votes?.length) return [];
     return VOTE_OPTIONS.map((value) => ({
@@ -140,6 +153,9 @@ function App() {
       count: sessionState.votes.filter((vote) => vote.value === value).length
     }));
   }, [sessionState]);
+
+  const connectedCount = sessionState?.participants?.length || 0;
+  const votesCount = sessionState?.votes?.length || 0;
 
   const voteStatusByParticipant = useMemo(() => {
     if (!sessionState?.participants?.length) return [];
@@ -196,11 +212,38 @@ function App() {
             <p>Código: {sessionState?.code || sessionCode}</p>
           </div>
 
-          <label>
-            Título de la historia
-            <input value={title} onChange={(e) => setTitle(e.target.value)} />
-          </label>
-          <button onClick={updateTitle}>Guardar título</button>
+          {isOwner ? (
+            <>
+              <label>
+                Título de la historia
+                <input value={title} onChange={(e) => setTitle(e.target.value)} />
+              </label>
+              <button onClick={updateTitle}>Guardar título</button>
+            </>
+          ) : (
+            <div className="story-title">
+              <strong>Título de la historia:</strong> {sessionState?.title || title}
+            </div>
+          )}
+
+          <div className="participant-summary">
+            <div className="summary-pill">Participants: {connectedCount}</div>
+            <div className="summary-pill">Voted: {votesCount}</div>
+          </div>
+
+          <div className="participant-bar">
+            {voteStatusByParticipant.map((participant) => (
+              <div
+                key={participant.id}
+                className={`participant-chip ${participant.isOwner ? 'admin' : ''} ${participant.voted ? 'voted' : 'pending'}`}
+              >
+                <span className="participant-avatar">{participant.name.slice(0, 2).toUpperCase()}</span>
+                <span className="participant-name">{participant.name}</span>
+                {participant.isOwner && <span className="participant-badge">ADM</span>}
+                {!participant.isOwner && participant.voted && <span className="participant-check">✓</span>}
+              </div>
+            ))}
+          </div>
 
           <div className="actions">
             {isOwner && (
@@ -212,17 +255,25 @@ function App() {
             <button className="secondary" onClick={leaveSession}>Salir</button>
           </div>
 
-          <div className="vote-grid">
-            {VOTE_OPTIONS.map((value) => (
-              <button
-                key={value}
-                className={`vote-card ${currentVote === value ? 'selected' : ''}`}
-                onClick={() => handleVote(value)}
-              >
-                {value}
+          {!isOwner && (
+            <>
+              <div className="vote-grid">
+                {VOTE_OPTIONS.map((value) => (
+                  <button
+                    key={value}
+                    className={`vote-card ${currentVote === value ? 'selected' : ''}`}
+                    onClick={() => handleVote(value)}
+                    disabled={hasVoted}
+                  >
+                    {value}
+                  </button>
+                ))}
+              </div>
+              <button onClick={submitVote} disabled={!currentVote || hasVoted}>
+                {hasVoted ? 'Voto enviado' : 'Enviar votación'}
               </button>
-            ))}
-          </div>
+            </>
+          )}
 
           <div className="participants-list">
             <h3>Participantes</h3>

@@ -201,8 +201,21 @@ function App() {
     }));
   }, [sessionState]);
 
+  const topVoteValues = useMemo(() => {
+    if (!voteSummary.length) return [];
+    const maxCount = Math.max(...voteSummary.map((item) => item.count));
+    if (maxCount === 0) return [];
+    return voteSummary
+      .filter((item) => item.count === maxCount)
+      .map((item) => ({ value: item.value, count: item.count }));
+  }, [voteSummary]);
+
   const connectedCount = sessionState?.participants?.length || 0;
   const votesCount = sessionState?.votes?.length || 0;
+
+  const getInitials = (name) => {
+    return name?.substring(0, 2).toUpperCase() || '';
+  };
 
   const voteStatusByParticipant = useMemo(() => {
     if (!sessionState?.participants?.length) return [];
@@ -369,12 +382,22 @@ function App() {
                     key={participant.id}
                     className={`vote-result-bubble ${participant.voted ? 'voted' : 'pending'}`}
                   >
-                    {participant.voted ? '✓' : ''}
+                    {participant.voted ? getInitials(participant.name) : ''}
                   </div>
                 ))}
               </div>
             ) : (
               <p>La votación está oculta hasta que el administrador la revele.</p>
+            )}
+            {sessionState?.revealed && topVoteValues.length > 0 && (
+              <div className="top-vote-values">
+                <strong>Valor{topVoteValues.length > 1 ? 'es' : ''} más votado{topVoteValues.length > 1 ? 's' : ''}:</strong>
+                {topVoteValues.map((item, index) => (
+                  <span key={item.value} className="top-vote-value">
+                    {item.value} ({item.count}){index < topVoteValues.length - 1 ? ', ' : ''}
+                  </span>
+                ))}
+              </div>
             )}
           </div>
         </div>

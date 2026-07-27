@@ -229,6 +229,16 @@ button:disabled {
   color: #64748b;
 }
 
+.top-vote-values {
+  margin-top: 16px;
+  font-size: 0.95rem;
+}
+
+.top-vote-value {
+  display: inline-flex;
+  margin-left: 8px;
+}
+
 .participant-item span.voted {
   color: #16a34a;
   font-weight: 600;

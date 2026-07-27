@@ -25,13 +25,27 @@ app.get('/health', (_req, res) => {
 app.use(express.static(path.join(__dirname, '..', 'dist')));
 
 const sessions = new Map();
+const SESSION_TTL_MS = 30 * 60 * 1000;
 
 function createSessionCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
+function expireSession(sessionCode) {
+  const session = sessions.get(sessionCode);
+  if (!session) return;
+  io.to(sessionCode).emit('session-ended');
+  sessions.delete(sessionCode);
+}
+
 function getSession(sessionCode) {
-  return sessions.get(sessionCode);
+  const session = sessions.get(sessionCode);
+  if (!session) return null;
+  if (Date.now() > session.expiresAt) {
+    expireSession(sessionCode);
+    return null;
+  }
+  return session;
 }
 
 function createSessionData(sessionCode, ownerName, title) {
@@ -41,7 +55,9 @@ function createSessionData(sessionCode, ownerName, title) {
     ownerName,
     revealed: false,
     participants: [],
-    votes: []
+    votes: [],
+    createdAt: Date.now(),
+    expiresAt: Date.now() + SESSION_TTL_MS
   };
 }
 
@@ -110,6 +126,25 @@ io.on('connection', (socket) => {
     emitSessionState(socket, sessionCode);
   });
 
+  socket.on('leave-session', ({ sessionCode, participantName, isOwner }) => {
+    const session = getSession(sessionCode);
+    if (!session) {
+      socket.emit('session-error', { message: 'Sesión no encontrada' });
+      return;
+    }
+
+    if (isOwner) {
+      expireSession(sessionCode);
+      return;
+    }
+
+    const remaining = session.participants.filter((p) => p.id !== socket.id && p.name !== participantName);
+    if (remaining.length !== session.participants.length) {
+      session.participants = remaining;
+      emitSessionState(socket, sessionCode);
+    }
+  });
+
   socket.on('cast-vote', ({ sessionCode, participantName, value }) => {
     const session = getSession(sessionCode);
     if (!session) return;
@@ -149,6 +184,12 @@ io.on('connection', (socket) => {
     }
   });
 });
+
+setInterval(() => {
+  for (const sessionCode of Array.from(sessions.keys())) {
+    getSession(sessionCode);
+  }
+}, 60 * 1000);
 
 const PORT = process.env.PORT || 3001;
 httpServer.listen(PORT, () => {

@@ -33,9 +33,18 @@ function App() {
       setErrorMessage(message);
     });
 
+    socket.on('session-ended', () => {
+      setErrorMessage('La sesión ha finalizado.');
+      setJoined(false);
+      setSessionState(null);
+      setCurrentVote(null);
+      setIsOwner(false);
+    });
+
     return () => {
       socket.off('session-state');
       socket.off('session-error');
+      socket.off('session-ended');
     };
   }, [participantName]);
 
@@ -114,6 +123,9 @@ function App() {
   };
 
   const leaveSession = () => {
+    if (sessionCode) {
+      socket.emit('leave-session', { sessionCode, participantName, isOwner });
+    }
     setJoined(false);
     setSessionState(null);
     setCurrentVote(null);

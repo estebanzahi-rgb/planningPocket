@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { io } from 'socket.io-client';
-import { SOCKET_URL } from './config';
+import { SOCKET_URL, API_URL } from './config';
 
 const socket = io(SOCKET_URL);
 const VOTE_OPTIONS = [1, 3, 5, 8, 13];
@@ -39,7 +39,7 @@ function App() {
   }, [participantName]);
 
   const createSession = () => {
-    fetch('http://localhost:3001/api/sessions', {
+    fetch(`${API_URL}/api/sessions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ownerName, title })

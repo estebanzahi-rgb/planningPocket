@@ -44,14 +44,18 @@ En Vercel, completa:
 - Build Command: npm install && npm run build
 - Output Directory: dist
 
-### Variable de entorno
-Agrega esta variable:
+### Variables de entorno
+Agrega estas variables:
+- Name: VITE_API_URL
+- Value: https://planning-poker-api-nkef.onrender.com
 - Name: VITE_SOCKET_URL
-- Value: https://tu-backend-url.onrender.com
+- Value: https://planning-poker-api-nkef.onrender.com
 
 Por ejemplo:
+- Name: VITE_API_URL
+- Value: https://planning-poker-api-nkef.onrender.com
 - Name: VITE_SOCKET_URL
-- Value: https://planning-poker-api.onrender.com
+- Value: https://planning-poker-api-nkef.onrender.com
 
 ### Desplegar
 1. Haz clic en Deploy.

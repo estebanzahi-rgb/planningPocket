@@ -14,6 +14,7 @@ function App() {
   const [isOwner, setIsOwner] = useState(false);
   const [sessionState, setSessionState] = useState(null);
   const [currentVote, setCurrentVote] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     socket.on('session-state', (state) => {
@@ -29,7 +30,7 @@ function App() {
     });
 
     socket.on('session-error', ({ message }) => {
-      alert(message);
+      setErrorMessage(message);
     });
 
     return () => {
@@ -39,6 +40,13 @@ function App() {
   }, [participantName]);
 
   const createSession = () => {
+    setErrorMessage('');
+
+    if (!ownerName) {
+      setErrorMessage('Debes ingresar el nombre del creador.');
+      return;
+    }
+
     fetch(`${API_URL}/api/sessions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -50,13 +58,35 @@ function App() {
         setJoined(true);
         setIsOwner(true);
         socket.emit('join-session', { sessionCode: data.sessionCode, participantName: ownerName, isOwner: true });
+      })
+      .catch(() => {
+        setErrorMessage('No se pudo crear la sesión. Intenta de nuevo.');
       });
   };
 
   const joinSession = () => {
-    setJoined(true);
-    setIsOwner(false);
-    socket.emit('join-session', { sessionCode, participantName, isOwner: false });
+    setErrorMessage('');
+
+    if (!sessionCode || !participantName) {
+      setErrorMessage('Debes ingresar el código de sesión y tu nombre.');
+      return;
+    }
+
+    fetch(`${API_URL}/api/sessions/${sessionCode}`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Sesión no encontrada');
+        }
+        return res.json();
+      })
+      .then(() => {
+        setJoined(true);
+        setIsOwner(false);
+        socket.emit('join-session', { sessionCode, participantName, isOwner: false });
+      })
+      .catch((error) => {
+        setErrorMessage(error.message);
+      });
   };
 
   const handleVote = (value) => {
@@ -92,6 +122,8 @@ function App() {
       {!joined ? (
         <div className="panel">
           <h2>Crear o unirse a una sesión</h2>
+
+          {errorMessage && <div className="error-message">{errorMessage}</div>}
 
           <label>
             Nombre del creador

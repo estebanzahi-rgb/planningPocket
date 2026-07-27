@@ -216,6 +216,20 @@ function App() {
     });
   }, [sessionState]);
 
+  const voterStatus = useMemo(() => {
+    if (!sessionState?.participants?.length) return [];
+    return sessionState.participants
+      .filter((participant) => !participant.isOwner)
+      .map((participant) => {
+        const vote = sessionState.votes.find((item) => item.participantName === participant.name);
+        return {
+          ...participant,
+          voted: Boolean(vote),
+          voteValue: vote?.value ?? null
+        };
+      });
+  }, [sessionState]);
+
   return (
     <div className="app-shell">
       <h1>Planning Poker</h1>
@@ -267,11 +281,7 @@ function App() {
               </label>
               <button onClick={updateTitle}>Guardar título</button>
             </>
-          ) : (
-            <div className="story-title">
-              <strong>Título de la historia:</strong> {sessionState?.title || title}
-            </div>
-          )}
+          ) : null}
 
           <div className="participant-summary">
             <div className="summary-pill">Participants: {connectedCount}</div>
@@ -335,24 +345,31 @@ function App() {
           {isOwner && (
             <div className="vote-status">
               <h3>Estado de votación</h3>
-              {voteStatusByParticipant.map((participant) => (
-                <div key={participant.id} className="participant-item">
-                  <span>{participant.name}</span>
-                  <span className={participant.voted ? 'voted' : 'pending'}>
-                    {participant.voted ? `Votó${participant.voteValue !== null ? ` (${participant.voteValue})` : ''}` : 'Falta votar'}
-                  </span>
-                </div>
-              ))}
+              <div className="vote-status-grid">
+                {voterStatus.map((participant) => (
+                  <div key={participant.id} className="vote-status-bubble">
+                    <span className={`vote-status-icon ${participant.voted ? 'voted' : 'pending'}`}>
+                      {participant.voted ? '✓' : ''}
+                    </span>
+                    <span className="vote-status-label">
+                      {participant.voted ? (sessionState?.revealed ? participant.voteValue : 'Votó') : 'Pendiente'}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
           <div className="results">
             <h3>Resultados</h3>
             {sessionState?.revealed ? (
-              <div className="vote-summary">
-                {sessionState?.votes?.map((vote) => (
-                  <div key={vote.participantName} className="vote-item">
-                    <strong>{vote.participantName}</strong>: {vote.value}
+              <div className="vote-result-grid">
+                {voterStatus.map((participant) => (
+                  <div
+                    key={participant.id}
+                    className={`vote-result-bubble ${participant.voted ? 'voted' : 'pending'}`}
+                  >
+                    {participant.voted ? '✓' : ''}
                   </div>
                 ))}
               </div>

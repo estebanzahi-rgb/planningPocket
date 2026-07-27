@@ -4,6 +4,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import pkg from './package.json' assert { type: 'json' };
 
 const app = express();
 const httpServer = createServer(app);
@@ -16,11 +17,16 @@ const io = new Server(httpServer, {
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const APP_VERSION = process.env.APP_VERSION || pkg.version || '1.0.0';
 
 app.use(cors());
 app.use(express.json());
 app.get('/health', (_req, res) => {
-  res.json({ status: 'ok' });
+  res.json({ status: 'ok', version: APP_VERSION });
+});
+
+app.get('/api/version', (_req, res) => {
+  res.json({ version: APP_VERSION });
 });
 app.use(express.static(path.join(__dirname, '..', 'dist')));
 
@@ -71,7 +77,8 @@ function emitSessionState(socket, sessionCode) {
     ownerName: session.ownerName,
     revealed: session.revealed,
     participants: session.participants,
-    votes: session.votes
+    votes: session.votes,
+    appVersion: APP_VERSION
   });
 }
 

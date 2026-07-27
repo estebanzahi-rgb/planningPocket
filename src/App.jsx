@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { io } from 'socket.io-client';
-import { SOCKET_URL, API_URL } from './config';
+import { SOCKET_URL, API_URL, APP_VERSION } from './config';
 
 const socket = io(SOCKET_URL);
 const VOTE_OPTIONS = [1, 3, 5, 8, 13];
@@ -16,8 +16,23 @@ function App() {
   const [currentVote, setCurrentVote] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
+  const resetSession = (message = 'La sesión no está disponible. Regresa al menú principal.') => {
+    setErrorMessage(message);
+    setJoined(false);
+    setSessionState(null);
+    setCurrentVote(null);
+    setIsOwner(false);
+    setSessionCode('');
+    setParticipantName('');
+  };
+
   useEffect(() => {
     socket.on('session-state', (state) => {
+      if (state.appVersion && state.appVersion !== APP_VERSION) {
+        resetSession('Nueva versión disponible. Refresca la página para usar la última versión.');
+        return;
+      }
+
       setSessionState(state);
       const currentParticipant = state.participants.find((p) => p.name === participantName);
       const myVote = state.votes.find((vote) => vote.participantName === participantName);
@@ -31,22 +46,35 @@ function App() {
 
     socket.on('session-error', ({ message }) => {
       setErrorMessage(message);
+      if (message.toLowerCase().includes('sesión no encontrada') && joined) {
+        resetSession();
+      }
     });
 
     socket.on('session-ended', () => {
-      setErrorMessage('La sesión ha finalizado.');
-      setJoined(false);
-      setSessionState(null);
-      setCurrentVote(null);
-      setIsOwner(false);
+      resetSession();
+    });
+
+    socket.on('disconnect', () => {
+      if (joined) {
+        setErrorMessage('Conexión perdida. Intentando reconectar...');
+      }
+    });
+
+    socket.on('connect', () => {
+      if (joined && sessionCode && participantName) {
+        joinSocketSession({ sessionCode, participantName, isOwner });
+      }
     });
 
     return () => {
       socket.off('session-state');
       socket.off('session-error');
       socket.off('session-ended');
+      socket.off('disconnect');
+      socket.off('connect');
     };
-  }, [participantName]);
+  }, [joined, participantName, sessionCode, isOwner]);
 
   useEffect(() => {
     if (sessionState?.title && sessionState.title !== title) {
@@ -59,10 +87,11 @@ function App() {
       socket.emit('join-session', { sessionCode, participantName, isOwner });
     };
 
-    if (socket.connected) {
-      doJoin();
-    } else {
+    if (!socket.connected) {
+      socket.connect();
       socket.once('connect', doJoin);
+    } else {
+      doJoin();
     }
   };
 

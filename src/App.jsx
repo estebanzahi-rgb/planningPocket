@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { io } from 'socket.io-client';
-import { SOCKET_URL, API_URL, APP_VERSION } from './config';
+import { SOCKET_URL, API_URL, APP_VERSION, MISSING_ENV_WARNING } from './config';
 
 const socket = io(SOCKET_URL);
 const VOTE_OPTIONS = [1, 3, 5, 8, 13];
@@ -97,6 +97,11 @@ function App() {
 
   const createSession = () => {
     setErrorMessage('');
+
+    if (MISSING_ENV_WARNING) {
+      setErrorMessage(MISSING_ENV_WARNING);
+      return;
+    }
 
     if (!ownerName) {
       setErrorMessage('Debes ingresar el nombre del creador.');

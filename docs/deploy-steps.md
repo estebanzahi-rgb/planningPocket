@@ -39,6 +39,7 @@ Render asignará el puerto automáticamente.
 
 ### Configuración del proyecto
 En Vercel, completa:
+- Project Name: planning-poker
 - Framework Preset: Vite
 - Root Directory: .
 - Build Command: npm install && npm run build

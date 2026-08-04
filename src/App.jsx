@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { io } from 'socket.io-client';
 import { SOCKET_URL, API_URL, APP_VERSION, MISSING_ENV_WARNING } from './config';
 
-const socket = io(SOCKET_URL);
+const socket = SOCKET_URL ? io(SOCKET_URL) : null;
 const VOTE_OPTIONS = [1, 3, 5, 8, 13];
 
 function App() {
@@ -27,6 +27,8 @@ function App() {
   };
 
   useEffect(() => {
+    if (!socket) return;
+
     socket.on('session-state', (state) => {
       if (state.appVersion && state.appVersion !== APP_VERSION) {
         resetSession('Nueva versión disponible. Refresca la página para usar la última versión.');
@@ -149,7 +151,9 @@ function App() {
       .then(() => {
         setJoined(true);
         setIsOwner(false);
-        socket.emit('join-session', { sessionCode, participantName, isOwner: false });
+        if (socket) {
+          socket.emit('join-session', { sessionCode, participantName, isOwner: false });
+        }
       })
       .catch((error) => {
         setErrorMessage(error.message);

@@ -32,7 +32,7 @@ app.get('/api/version', (_req, res) => {
 app.use(express.static(path.join(__dirname, '..', 'dist')));
 
 const sessions = new Map();
-const SESSION_TTL_MS = 30 * 60 * 1000;
+const SESSION_TTL_MS = 4 * 60 * 60 * 1000;
 
 function createSessionCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
